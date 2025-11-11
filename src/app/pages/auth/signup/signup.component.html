@@ -1,0 +1,77 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300 px-4 py-8">
+  <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 text-center">Create your account</h1>
+    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 text-center">Sign up to sync your todo list everywhere.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+        <input
+          type="text"
+          formControlName="displayName"
+          class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+          placeholder="Your name"
+        />
+        <p class="text-sm text-red-500 mt-1" *ngIf="form.controls.displayName.touched && form.controls.displayName.invalid">
+          Name should be at least 2 characters.
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+          placeholder="you@example.com"
+        />
+        <p class="text-sm text-red-500 mt-1" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+          Please enter a valid email address.
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+        <input
+          type="password"
+          formControlName="password"
+          class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+          placeholder="Create a password"
+        />
+        <p class="text-sm text-red-500 mt-1" *ngIf="form.controls.password.touched && form.controls.password.invalid">
+          Password must be at least 6 characters.
+        </p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none"
+          placeholder="Confirm password"
+        />
+      </div>
+
+      <div *ngIf="error" class="text-sm text-red-500 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800 rounded-lg p-3">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-lg transition-colors duration-200"
+      >
+        <span *ngIf="!loading">Sign Up</span>
+        <span *ngIf="loading" class="flex items-center justify-center gap-2">
+          <i class="fas fa-spinner fa-spin"></i>
+          Creating account...
+        </span>
+      </button>
+    </form>
+
+    <p class="mt-6 text-center text-gray-600 dark:text-gray-400">
+      Already have an account?
+      <a routerLink="/login" class="text-blue-500 hover:text-blue-600 font-medium">Log in</a>
+    </p>
+  </div>
+</div>

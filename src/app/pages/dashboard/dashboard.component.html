@@ -1,0 +1,114 @@
+<div class="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-900">
+  <!-- Fixed Sign Out Button in Top Right -->
+  <div class="fixed top-2 right-2 sm:top-4 sm:right-4 z-50">
+    <button
+      *ngIf="user$ | async"
+      (click)="signOut()"
+      class="px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-1 sm:gap-2"
+    >
+      <i class="fas fa-sign-out-alt text-xs sm:text-sm"></i>
+      <span class="hidden sm:inline">Sign Out</span>
+    </button>
+  </div>
+
+  <div class="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl pt-16 sm:pt-8">
+    <app-header #headerRef></app-header>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400" *ngIf="user$ | async as user; else notLoggedIn">
+        <span class="opacity-75">Welcome, </span>
+        <span class="font-medium text-gray-800 dark:text-gray-200">{{ getUserDisplayName(user) }}</span>
+      </div>
+      <ng-template #notLoggedIn>
+        <div class="flex items-center gap-3">
+          <p class="text-sm text-gray-600 dark:text-gray-400">Not signed in</p>
+          <a
+            routerLink="/login"
+            class="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+          </a>
+        </div>
+      </ng-template>
+      <div class="flex items-center justify-end gap-2 sm:gap-3">
+        <button
+          (click)="toggleTheme()"
+          class="p-2 sm:p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow duration-300 text-gray-700 dark:text-gray-300 hover:scale-110 transform transition-transform"
+          aria-label="Toggle theme"
+        >
+          <i [class]="isDarkMode ? 'fas fa-sun text-sm sm:text-base' : 'fas fa-moon text-sm sm:text-base'"></i>
+        </button>
+      </div>
+    </div>
+
+    <div #addTodoRef>
+      <app-add-todo (addTask)="handleAddTask($event)"></app-add-todo>
+    </div>
+
+    <div *ngIf="errorMessage" class="mb-6 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg px-4 py-3 text-sm">
+      {{ errorMessage }}
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md text-center">
+        <div class="text-xl sm:text-2xl font-bold text-blue-500 dark:text-blue-400">{{ totalCount }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md text-center">
+        <div class="text-xl sm:text-2xl font-bold text-green-500 dark:text-green-400">{{ completedCount }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Done</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md text-center">
+        <div class="text-xl sm:text-2xl font-bold text-orange-500 dark:text-orange-400">{{ pendingCount }}</div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Pending</div>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mb-4 sm:mb-6">
+      <button
+        (click)="setFilter('all')"
+        [class.bg-blue-500]="currentFilter === 'all'"
+        [class.text-white]="currentFilter === 'all'"
+        [class.bg-white]="currentFilter !== 'all'"
+        [class.dark:bg-gray-800]="currentFilter !== 'all'"
+        [class.text-gray-700]="currentFilter !== 'all'"
+        [class.dark:text-gray-300]="currentFilter !== 'all'"
+        class="flex-1 px-2 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+      >
+        All
+      </button>
+      <button
+        (click)="setFilter('pending')"
+        [class.bg-blue-500]="currentFilter === 'pending'"
+        [class.text-white]="currentFilter === 'pending'"
+        [class.bg-white]="currentFilter !== 'pending'"
+        [class.dark:bg-gray-800]="currentFilter !== 'pending'"
+        [class.text-gray-700]="currentFilter !== 'pending'"
+        [class.dark:text-gray-300]="currentFilter !== 'pending'"
+        class="flex-1 px-2 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+      >
+        Pending
+      </button>
+      <button
+        (click)="setFilter('completed')"
+        [class.bg-blue-500]="currentFilter === 'completed'"
+        [class.text-white]="currentFilter === 'completed'"
+        [class.bg-white]="currentFilter !== 'completed'"
+        [class.dark:bg-gray-800]="currentFilter !== 'completed'"
+        [class.text-gray-700]="currentFilter !== 'completed'"
+        [class.dark:text-gray-300]="currentFilter !== 'completed'"
+        class="flex-1 px-2 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+      >
+        Completed
+      </button>
+    </div>
+
+    <app-todo-list
+      [tasks]="filteredTasks"
+      [currentFilter]="currentFilter"
+      (toggleTask)="handleToggleTask($event)"
+      (deleteTask)="handleDeleteTask($event)"
+      (updateTask)="handleUpdateTask($event)"
+    ></app-todo-list>
+  </div>
+</div>

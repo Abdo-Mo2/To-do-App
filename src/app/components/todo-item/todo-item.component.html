@@ -1,0 +1,68 @@
+<div #itemCard class="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md hover:shadow-lg transition-shadow duration-200">
+  <div class="flex items-center gap-2 sm:gap-3">
+    <input
+      type="checkbox"
+      [checked]="task.completed"
+      (change)="onToggle()"
+      class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+    />
+
+    <div class="flex-1 min-w-0">
+      <div *ngIf="!editing" class="flex items-center gap-2">
+        <span
+          [class.line-through]="task.completed"
+          [class.text-gray-400]="task.completed"
+          [class.text-gray-800]="!task.completed"
+          [class.dark:text-gray-200]="!task.completed"
+          class="flex-1 text-sm sm:text-base break-words"
+        >
+          {{ task.text }}
+        </span>
+      </div>
+      <div *ngIf="editing" class="flex items-center gap-2">
+        <input
+          type="text"
+          [(ngModel)]="editText"
+          (keyup.enter)="saveEdit()"
+          (keyup.escape)="cancelEdit()"
+          class="flex-1 px-2 py-1 text-sm sm:text-base rounded border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none"
+          autofocus
+        />
+      </div>
+    </div>
+
+    <div class="flex gap-1 sm:gap-2 flex-shrink-0">
+      <button
+        *ngIf="!editing"
+        (click)="startEdit()"
+        class="p-1.5 sm:p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 rounded transition-colors duration-200"
+        aria-label="Edit task"
+      >
+        <i class="fas fa-edit text-sm sm:text-base"></i>
+      </button>
+      <button
+        *ngIf="editing"
+        (click)="saveEdit()"
+        class="p-1.5 sm:p-2 text-green-500 hover:bg-green-50 dark:hover:bg-gray-700 rounded transition-colors duration-200"
+        aria-label="Save task"
+      >
+        <i class="fas fa-check text-sm sm:text-base"></i>
+      </button>
+      <button
+        *ngIf="editing"
+        (click)="cancelEdit()"
+        class="p-1.5 sm:p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors duration-200"
+        aria-label="Cancel edit"
+      >
+        <i class="fas fa-times text-sm sm:text-base"></i>
+      </button>
+      <button
+        (click)="onDelete()"
+        class="p-1.5 sm:p-2 text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 rounded transition-colors duration-200"
+        aria-label="Delete task"
+      >
+        <i class="fas fa-trash text-sm sm:text-base"></i>
+      </button>
+    </div>
+  </div>
+</div>

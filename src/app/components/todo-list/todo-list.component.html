@@ -1,0 +1,22 @@
+<div class="space-y-3">
+  <app-todo-item
+    *ngFor="let task of tasks; trackBy: trackByTaskId"
+    [task]="task"
+    (toggle)="onToggleTask($event)"
+    (delete)="onDeleteTask($event)"
+    (update)="onUpdateTask($event)"
+  ></app-todo-item>
+
+  <div *ngIf="tasks.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+    <i class="fas fa-inbox text-5xl mb-4 opacity-50"></i>
+    <p class="text-lg">
+      {{
+        currentFilter === 'all'
+          ? 'No tasks yet. Add one above!'
+          : currentFilter === 'completed'
+            ? 'No completed tasks yet.'
+            : 'No pending tasks. Great job!'
+      }}
+    </p>
+  </div>
+</div>
