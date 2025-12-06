@@ -71,7 +71,9 @@ export class TodoService implements OnDestroy {
             createdAt: new Date(),
           };
           const updatedTasks = [newTask, ...this.tasksSubject.value];
-          this.saveTasksToLocalStorage(updatedTasks, user.id);
+          if (user.id) {
+            this.saveTasksToLocalStorage(updatedTasks, user.id);
+          }
           this.tasksSubject.next(updatedTasks);
           return throwError(() => error);
         })
@@ -113,7 +115,9 @@ export class TodoService implements OnDestroy {
           const updatedTasks = this.tasksSubject.value.map(t =>
             t.id === id ? updatedTask : t
           );
-          this.saveTasksToLocalStorage(updatedTasks, user.id);
+          if (user.id) {
+            this.saveTasksToLocalStorage(updatedTasks, user.id);
+          }
           this.tasksSubject.next(updatedTasks);
           return throwError(() => error);
         })
@@ -148,7 +152,9 @@ export class TodoService implements OnDestroy {
         catchError((error) => {
           console.warn('API call failed, using localStorage fallback:', error);
           // Fallback to localStorage
-          this.saveTasksToLocalStorage(updatedTasks, user.id);
+          if (user.id) {
+            this.saveTasksToLocalStorage(updatedTasks, user.id);
+          }
           return throwError(() => error);
         })
       )
@@ -186,7 +192,9 @@ export class TodoService implements OnDestroy {
           const updatedTasks = this.tasksSubject.value.map(task =>
             task.id === id ? { ...task, text: trimmed } : task
           );
-          this.saveTasksToLocalStorage(updatedTasks, user.id);
+          if (user.id) {
+            this.saveTasksToLocalStorage(updatedTasks, user.id);
+          }
           this.tasksSubject.next(updatedTasks);
           return throwError(() => error);
         })
