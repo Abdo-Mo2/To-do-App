@@ -1,20 +1,30 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, catchError, throwError } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface User {
-  id: string;
+  id?: string;
   email: string;
-  displayName: string;
+  name?: string;
+  displayName?: string;
+  role?: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly usersKey = 'todo_app_users';
+  private readonly apiUrl = 'https://ecommerce.routemisr.com';
+  private readonly tokenKey = 'todo_app_token';
   private readonly currentUserKey = 'todo_app_current_user';
   private readonly userSubject = new BehaviorSubject<User | null>(this.loadCurrentUser());
   readonly user$ = this.userSubject.asObservable();
 
-  constructor() {
+  constructor(private readonly http: HttpClient) {
     // Load current user on initialization
     const user = this.loadCurrentUser();
     if (user) {
@@ -54,30 +64,79 @@ export class AuthService {
     return newUser;
   }
 
-  async signIn(email: string, password: string): Promise<User> {
-    const users = this.getAllUsers();
-    const user = users.find(
-      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-
-    if (!user) {
-      throw new Error('Invalid email or password. Please try again.');
+  private getAllUsers(): Array<User & { password: string }> {
+    try {
+      const saved = localStorage.getItem('todo_app_users');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
+  }
 
-    const userWithoutPassword: User = {
-      id: user.id,
-      email: user.email,
-      displayName: user.displayName,
-    };
+  private saveAllUsers(users: Array<User & { password: string }>): void {
+    try {
+      localStorage.setItem('todo_app_users', JSON.stringify(users));
+    } catch (error) {
+      console.error('Error saving users:', error);
+    }
+  }
 
-    this.setCurrentUser(userWithoutPassword);
-    return userWithoutPassword;
+  async signIn(email: string, password: string): Promise<User> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .post<LoginResponse>(`${this.apiUrl}/api/v1/auth/login`, {
+          email,
+          password,
+        })
+        .pipe(
+          map((response) => {
+            // Store token
+            localStorage.setItem(this.tokenKey, response.token);
+            
+            // Map API user to our User interface
+            const user: User = {
+              id: response.user.id || response.user.email,
+              email: response.user.email,
+              displayName: response.user.name || response.user.displayName || response.user.email,
+              name: response.user.name,
+              role: response.user.role,
+            };
+
+            this.setCurrentUser(user);
+            return user;
+          }),
+          catchError((error) => {
+            let errorMessage = 'Invalid email or password. Please try again.';
+            
+            if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            return throwError(() => new Error(errorMessage));
+          })
+        )
+        .subscribe({
+          next: (user) => resolve(user),
+          error: (err) => reject(err),
+        });
+    });
   }
 
   signOut(): Promise<void> {
     localStorage.removeItem(this.currentUserKey);
+    localStorage.removeItem(this.tokenKey);
     this.userSubject.next(null);
     return Promise.resolve();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken() && !!this.currentUser;
   }
 
   getErrorMessage(error: any): string {
@@ -90,23 +149,6 @@ export class AuthService {
     }
 
     return error.message || 'An unexpected error occurred.';
-  }
-
-  private getAllUsers(): Array<User & { password: string }> {
-    try {
-      const saved = localStorage.getItem(this.usersKey);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private saveAllUsers(users: Array<User & { password: string }>): void {
-    try {
-      localStorage.setItem(this.usersKey, JSON.stringify(users));
-    } catch (error) {
-      console.error('Error saving users:', error);
-    }
   }
 
   private loadCurrentUser(): User | null {
